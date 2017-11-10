@@ -1,0 +1,65 @@
+{
+  "short-description": "Benchmark PR#27089",
+  "description": "This indexes documents and applies a pipeline to parse the date using a templated timezone",
+  "indices": [
+    {
+      "name": "rally-date-test",
+      "types": [
+        {
+          "name": "doc",
+          "mapping": "mappings.json",
+          "documents": "documents.ndjson.bz2",
+          "document-count": 10000000,
+          "uncompressed-bytes": 400000000,
+          "compressed-bytes": 77201
+        }
+      ]
+    }
+  ],
+  "operations": [
+    {
+      "name": "create-pipeline",
+      "operation-type": "create-pipeline",
+      "pipeline-definition": {
+        "name": "my_date_pipeline",
+        "body": {
+          "description": "test date processor templating",
+          "processors": [
+            {
+              "date": {
+                "field": "my_date",
+                "formats": ["ISO8601"]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "index-with-pipeline",
+      "operation-type": "index",
+      "pipeline": "my_date_pipeline",
+      "bulk-size": 500
+    }
+  ],
+  "challenges": [
+    {
+      "name": "index",
+      "description": "Indexes documents with the date templating pipeline",
+      "index-settings": {
+        "index.number_of_replicas": 0
+      },
+      "schedule": [
+        {
+          "operation": "create-pipeline"
+        },
+        {
+          "operation": "index-with-pipeline",
+          "clients": 2,
+          "warmup-time-period": 10,
+          "time-period": 360
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "doc": {
+    "dynamic": "strict",
+    "properties": {
+      "my_date": {
+        "type": "keyword"
+      },
+      "@timestamp": {
+        "type": "date"
+      }
+    }
+  }
+}
